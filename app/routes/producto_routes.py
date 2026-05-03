@@ -9,6 +9,8 @@ def get_productos():
     return jsonify(productos)
 
 
+
+
 @producto_bp.route('/productos/<int:id>', methods=['GET'])
 def get_producto(id):
     producto = producto_model.get_by_id(id)
@@ -21,10 +23,10 @@ def get_producto(id):
 def create_producto():
     data = request.json
 
-    if not data or 'nombre' not in data or 'precio' not in data:
+    if not data or 'nombre' not in data or 'precio' not in data or 'cantidad' not in data:
         return jsonify({"error": "Datos incompletos"}), 400
 
-    producto_model.create(data['nombre'], data['precio'])
+    producto_model.create(data['nombre'], data['precio'], data['cantidad'])
     return jsonify({"msg": "Producto creado"}), 201
 
 
@@ -32,10 +34,10 @@ def create_producto():
 def update_producto(id):
     data = request.json
 
-    if not data or 'nombre' not in data or 'precio' not in data:
+    if not data or 'nombre' not in data or 'precio' not in data or 'cantidad' not in data:
         return jsonify({"error": "Datos incompletos"}), 400
 
-    producto_model.update(id, data['nombre'], data['precio'])
+    producto_model.update(id, data['nombre'], data['precio'], data['cantidad'])
     return jsonify({"msg": "Producto actualizado"})
 
 

@@ -18,23 +18,23 @@ def get_by_id(id):
     return result
 
 
-def create(nombre, precio):
+def create(nombre, precio, cantidad):
     conn = get_connection()
     with conn.cursor() as cursor:
         cursor.execute(
-            "INSERT INTO productos (nombre, precio) VALUES (%s, %s)",
-            (nombre, precio)
+            "INSERT INTO productos (nombre, precio, cantidad) VALUES (%s, %s, %s)",
+            (nombre, precio, cantidad)
         )
     conn.commit()
     conn.close()
 
 
-def update(id, nombre, precio):
+def update(id, nombre, precio, cantidad):
     conn = get_connection()
     with conn.cursor() as cursor:
         cursor.execute(
-            "UPDATE productos SET nombre=%s, precio=%s WHERE id=%s",
-            (nombre, precio, id)
+            "UPDATE productos SET nombre=%s, precio=%s, cantidad=%s WHERE id=%s",
+            (nombre, precio, cantidad, id)
         )
     conn.commit()
     conn.close()
