@@ -11,6 +11,15 @@
         <h1>Lista de productos</h1>
         <p id="mensaje">Cargando productos...</p>
 
+        <form id="form-producto">
+            <input type="hidden" id="producto-id">
+            <input type="text" id="nombre" placeholder="Nombre" required>
+            <input type="number" id="precio" placeholder="Precio" required>
+            <input type="number" id="cantidad" placeholder="Cantidad" required>
+            <button type="submit">Guardar</button>
+            <button type="button" id="cancelar-edicion">Cancelar</button>
+        </form>
+
         <table id="tabla-productos">
             <thead>
                 <tr>
@@ -18,6 +27,7 @@
                 <th>Nombre</th>
                 <th>Precio</th>
                 <th>Cantidad</th>
+                <th>Acciones</th>
                 </tr>
             </thead>
             <tbody id="tbody-productos"></tbody>

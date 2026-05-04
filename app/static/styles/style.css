@@ -6,7 +6,7 @@ body {
 }
 
 .container {
-    max-width: 900px;
+    max-width: 1000px;
     margin: auto;
     background: white;
     padding: 24px;
@@ -23,6 +23,38 @@ h1 {
     color: #555;
 }
 
+form {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+form input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    flex: 1;
+    min-width: 180px;
+}
+
+form button {
+    padding: 10px 14px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+form button[type="submit"] {
+    background: #0d6efd;
+    color: white;
+}
+
+#cancelar-edicion {
+    background: #6c757d;
+    color: white;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
@@ -36,5 +68,22 @@ th, td {
 
 th {
     background: #0d6efd;
+    color: white;
+}
+
+.acciones button {
+    margin-right: 8px;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-editar {
+    background: #ffc107;
+}
+
+.btn-eliminar {
+    background: #dc3545;
     color: white;
 }
