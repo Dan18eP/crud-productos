@@ -1,15 +1,19 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, render_template
 from app.models import producto_model
 from app.utils.response import success, error
 
 producto_bp = Blueprint('producto_bp', __name__)
 
+
+@producto_bp.route('/', methods=['GET'])
+def home():
+    return render_template('index.html')
+
+
 @producto_bp.route('/productos', methods=['GET'])
 def get_productos():
     productos = producto_model.get_all()
     return success(productos)
-
-
 
 
 @producto_bp.route('/productos/<int:id>', methods=['GET'])
