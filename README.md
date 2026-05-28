@@ -1,146 +1,96 @@
-# CRUD Productos
+#  CRUD de Productos - AWS DynamoDB & EC2
 
-Aplicación web CRUD de productos construida con Flask, MySQL y JavaScript.
+Aplicación web desarrollada con **Python (Flask)** y **Amazon DynamoDB**, diseñada para demostrar el uso de servicios en la **Capa Gratuita de AWS** y el cumplimiento de estándares de seguridad y buenas prácticas.
 
-El proyecto permite listar, crear, editar y eliminar productos desde una interfaz web servida por Flask, además de exponer endpoints JSON para la API. Flask usa carpetas `templates/` para las vistas HTML y `static/` para archivos CSS y JavaScript. [web:117][web:123][web:116]
+---
 
-## Tecnologías usadas
+##  Tabla de Contenidos
+- [Arquitectura](#-arquitectura)
+- [Criterios de Evaluación Cubiertos](#-criterios-de-evaluación-cubiertos)
+- [Tecnologías Utilizadas](#-tecnologías-utilizadas)
+- [Configuración en AWS](#-configuración-en-aws)
+- [Instalación Local](#-instalación-local)
+- [Decisiones Técnicas](#-decisiones-técnicas)
 
-- Python
-- Flask
-- Flask-CORS
-- MySQL
-- HTML
-- CSS
-- JavaScript
+---
 
-## Estructura del proyecto
+## 🏗 Arquitectura
+La aplicación sigue un modelo cliente-servidor desplegado en la infraestructura de AWS:
+- **Frontend:** HTML5, Tailwind CSS y JavaScript Vanilla (interactúa con el API mediante Fetch).
+- **Backend:** Flask (Python) sirviendo como API RESTful.
+- **Base de Datos:** Amazon DynamoDB (NoSQL) para persistencia escalable.
+- **Cómputo:** Instancia Amazon EC2 (t2.micro / t3.micro).
+- **Seguridad:** Roles de IAM (Instance Profiles) para acceso programático sin llaves expuestas.
 
-```bash
-CRUD-PRODUCTOS/
-├── app/
-│   ├── models/
-│   │   └── producto_model.py
-│   ├── routes/
-│   │   └── producto_routes.py
-│   ├── static/
-│   │   ├── js/
-│   │   │   └── script.js
-│   │   └── styles/
-│   │       └── style.css
-│   ├── templates/
-│   │   └── index.html
-│   ├── utils/
-│   │   └── response.py
-│   ├── __init__.py
-│   ├── config.py
-│   └── db.py
-├── .env
-├── requirements.txt
-├── run.py
-└── README.md
-```
+---
 
-## Descripción de carpetas y archivos
+##  Criterios de Evaluación Cubiertos (Nivel Excelente)
 
-- `app/`: paquete principal de la aplicación Flask.
-- `app/models/producto_model.py`: consultas a la base de datos para productos.
-- `app/routes/producto_routes.py`: rutas de la API y ruta principal de la vista.
-- `app/static/js/script.js`: lógica del frontend para consumir la API y manejar el CRUD.
-- `app/static/styles/style.css`: estilos de la interfaz.
-- `app/templates/index.html`: vista principal renderizada con Jinja.
-- `app/utils/response.py`: helpers para respuestas JSON.
-- `app/__init__.py`: inicialización de Flask y configuración general, incluyendo CORS.
-- `app/config.py`: configuración de variables de entorno.
-- `app/db.py`: conexión a MySQL.
-- `.env`: variables de entorno del proyecto.
-- `run.py`: punto de entrada para ejecutar la aplicación.
+### 1. Configuración y Despliegue
+- **Capa Gratuita:** Uso exclusivo de servicios `Free Tier`.
+- **Estabilidad:** Despliegue en EC2 con **Elastic IP** para asegurar un enlace funcional permanente.
 
-## Funcionalidades
+### 2. Base de Datos - Amazon DynamoDB
+- **Diseño Óptimo:** Tabla con Partition Key (`id` tipo UUID) para acceso rápido.
+- **Operaciones CRUD:** Implementación completa (Create, Read, Update, Delete) usando el SDK `boto3`.
+- **Manejo de Errores:** Captura de excepciones de `botocore` con retroalimentación clara al usuario.
 
-- Listar productos.
-- Crear productos.
-- Editar productos.
-- Eliminar productos.
-- Mostrar una interfaz web conectada a la API.
-- Responder en formato JSON desde los endpoints backend.
+### 3. Funcionalidad CRUD
+- **Create:** Validación de campos y generación de IDs únicos.
+- **Read:** Listado con **filtrado en tiempo real** (búsqueda por nombre o ID).
+- **Update:** Pre-carga de datos en el formulario y actualización inmediata.
+- **Delete:** **Confirmación explícita mediante Modal** antes de eliminar.
 
-## Endpoints disponibles
+### 4. Seguridad y Buenas Prácticas
+- **IAM Roles:** La aplicación **NO** contiene llaves de acceso (`AWS_ACCESS_KEY_ID`) en el código. Utiliza un rol asociado a la instancia EC2.
+- **Sanitización:** Validación de entradas en backend y frontend.
 
-- `GET /` → muestra la interfaz web.
-- `GET /productos` → lista todos los productos.
-- `GET /productos/<id>` → obtiene un producto por id.
-- `POST /productos` → crea un producto.
-- `PUT /productos/<id>` → actualiza un producto.
-- `DELETE /productos/<id>` → elimina un producto.
+---
 
-## Requisitos previos
+## 🛠 Tecnologías Utilizadas
+- **Lenguaje:** Python 3.x
+- **Framework Web:** Flask
+- **SDK AWS:** Boto3
+- **Estilos:** Tailwind CSS (Modern UI)
+- **Iconos:** FontAwesome
 
-- Python 3 instalado.
-- MySQL disponible.
-- Variables de entorno configuradas en `.env`.
-- Entorno virtual recomendado.
+---
 
-## Instalación
+## ☁️ Configuración en AWS
 
-1. Clona el repositorio:
+### 1. DynamoDB
+1. Crear una tabla llamada `Productos`.
+2. Partition Key: `id` (String).
 
-```bash
-git clone <url-del-repositorio>
-cd CRUD-PRODUCTOS
-```
+### 2. IAM (Seguridad)
+1. Crear un **Role** para servicio `EC2`.
+2. Adjuntar política `AmazonDynamoDBFullAccess` (o una política personalizada con permisos mínimos sobre la tabla `Productos`).
+3. Nombre sugerido: `EC2-DynamoDB-Role`.
 
-2. Crea y activa un entorno virtual:
+### 3. EC2 & Elastic IP
+1. Lanzar instancia `t2.micro` (Amazon Linux 2023).
+2. Asociar el **IAM Role** creado anteriormente.
+3. En **Networking**, crear una **Elastic IP** y asociarla a la instancia.
+4. Configurar **Security Group**: Permitir puerto `80` (HTTP) y `22` (SSH).
 
-### Windows
-```bash
-python -m venv venv
-.\venv\Scripts\activate
-```
+---
 
-### Linux / macOS
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
+##  Instalación Local
 
-3. Instala las dependencias:
+1. Clonar el repositorio.
+2. Crear entorno virtual: `python -m venv venv`.
+3. Activar entorno: `source venv/bin/activate` (Linux) o `venv\Scripts\activate` (Windows).
+4. Instalar dependencias: `pip install -r requirements.txt`.
+5. Configurar archivo `.env`:
+   ```env
+   AWS_REGION=us-east-1
+   DYNAMODB_TABLE=Productos
+   ```
+6. Ejecutar: `python run.py`.
 
-```bash
-pip install -r requirements.txt
-```
+---
 
-## Ejecución
-
-Inicia la aplicación con:
-
-```bash
-python run.py
-```
-
-Luego abre en el navegador:
-
-```bash
-http://127.0.0.1:5000/
-```
-
-## Variables de entorno
-
-Asegúrate de definir en `.env` las credenciales necesarias para la conexión a MySQL, según la configuración usada por `app/config.py` y `app/db.py`. [web:221]
-
-## Acceso desde navegador
-
-Si la aplicación está desplegada en una instancia EC2 con IP pública y el puerto 5000 está habilitado en el security group, se puede acceder desde el navegador usando:
-
-- `http://<IP_PUBLICA_EC2>:5000/`
-- `http://<IP_PUBLICA_EC2>:5000/productos`
-
-## Notas
-
-- El frontend está servido desde Flask, no desde GitHub Pages.
-- La interfaz usa JavaScript con `fetch()` para consumir los endpoints del backend. Flask documenta este patrón para trabajar con JavaScript, `fetch` y JSON. [web:164]
-- Se habilitó CORS en Flask como parte de la configuración del proyecto. Flask-CORS permite habilitar solicitudes cross-origin con una configuración simple sobre la aplicación Flask. [web:6][web:223]
-
-## Autor
-
-- Daniel Echeverría
+##  Decisiones Técnicas
+- **Uso de UUID:** Para evitar colisiones en una base de datos distribuida como DynamoDB.
+- **Manejo de Decimals:** Se implementó un decodificador personalizado (`decoder.py`) para convertir los tipos numéricos de DynamoDB a tipos JSON-compatibles.
+- **UI Progresiva:** Uso de Tailwind CSS para garantizar una interfaz profesional sin necesidad de frameworks pesados de frontend.
