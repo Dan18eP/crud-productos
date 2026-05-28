@@ -31,6 +31,9 @@ def create_producto():
     if not data or 'nombre' not in data or 'precio' not in data or 'cantidad' not in data:
         return error("Datos incompletos", 400)
 
+    if float(data['precio']) < 0 or int(data['cantidad']) < 0:
+        return error("El precio y la cantidad no pueden ser negativos", 400)
+
     try:
         producto_id = producto_model.create(data['nombre'], data['precio'], data['cantidad'])
         return success(data={"id": producto_id}, message="Producto creado", status=201)
@@ -44,6 +47,9 @@ def update_producto(id):
 
     if not data or 'nombre' not in data or 'precio' not in data or 'cantidad' not in data:
         return error("Datos incompletos", 400)
+
+    if float(data['precio']) < 0 or int(data['cantidad']) < 0:
+        return error("El precio y la cantidad no pueden ser negativos", 400)
 
     if producto_model.update(id, data['nombre'], data['precio'], data['cantidad']):
         return success(message="Producto actualizado")
