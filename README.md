@@ -38,12 +38,21 @@ La aplicación sigue un modelo cliente-servidor desplegado en la infraestructura
 ### 3. Funcionalidad CRUD
 - **Create:** Validación de campos y generación de IDs únicos.
 - **Read:** Listado con **filtrado en tiempo real** (búsqueda por nombre o ID).
-- **Update:** Pre-carga de datos en el formulario y actualización inmediata.
-- **Delete:** **Confirmación explícita mediante Modal** antes de eliminar.
+- **Update:** Pre-carga de datos, confirmación y **manejo de concurrencia básica** mediante `ConditionExpression` de DynamoDB.
+- **Delete:** **Confirmación explícita mediante Modal** antes de eliminar y validación de existencia.
 
 ### 4. Seguridad y Buenas Prácticas
-- **IAM Roles:** La aplicación **NO** contiene llaves de acceso (`AWS_ACCESS_KEY_ID`) en el código. Utiliza un rol asociado a la instancia EC2.
-- **Sanitización:** Validación de entradas en backend y frontend.
+- **IAM Roles:** Sin credenciales expuestas, uso de Instance Profiles.
+- **Seguridad de Capa de Aplicación:** Implementación de **Flask-Talisman** para inyectar cabeceras de seguridad (`X-Content-Type-Options`, `X-Frame-Options`, `X-XSS-Protection`).
+- **Sanitización:** Validación estricta de tipos y valores negativos en backend y frontend.
+
+---
+
+##  Optimización de Base de Datos (Excelente)
+Para cumplir con el diseño óptimo, se recomienda la creación de un **Global Secondary Index (GSI)**:
+1.  **Index Name:** `NombreIndex`
+2.  **Partition Key:** `nombre` (String)
+3.  **Uso:** Permite realizar búsquedas por nombre de producto sin necesidad de un `Scan` de tabla completa, reduciendo el consumo de RCU (Read Capacity Units).
 
 ---
 

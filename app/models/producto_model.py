@@ -50,6 +50,7 @@ def update(producto_id, nombre, precio, cantidad):
         table.update_item(
             Key={'id': producto_id},
             UpdateExpression="set nombre=:n, precio=:p, cantidad=:c, updatedAt=:u",
+            ConditionExpression="attribute_exists(id)",  # Asegura que el producto existe antes de editar
             ExpressionAttributeValues={
                 ':n': nombre,
                 ':p': precio,
@@ -60,15 +61,24 @@ def update(producto_id, nombre, precio, cantidad):
         )
         return True
     except ClientError as e:
-        print(f"Error al actualizar producto {producto_id}: {e.response['Error']['Message']}")
+        if e.response['Error']['Code'] == "ConditionalCheckFailedException":
+            print(f"Error: El producto {producto_id} ya no existe.")
+        else:
+            print(f"Error al actualizar producto {producto_id}: {e.response['Error']['Message']}")
         return False
 
 
 def delete(producto_id):
     table = get_table()
     try:
-        table.delete_item(Key={'id': producto_id})
+        table.delete_item(
+            Key={'id': producto_id},
+            ConditionExpression="attribute_exists(id)"  # Solo elimina si existe
+        )
         return True
     except ClientError as e:
-        print(f"Error al eliminar producto {producto_id}: {e.response['Error']['Message']}")
+        if e.response['Error']['Code'] == "ConditionalCheckFailedException":
+            print(f"Error: El producto {producto_id} ya no existe.")
+        else:
+            print(f"Error al eliminar producto {producto_id}: {e.response['Error']['Message']}")
         return False
