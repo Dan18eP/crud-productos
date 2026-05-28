@@ -1,13 +1,9 @@
-import pymysql
+import boto3
 from app.config import Config
 
-def get_connection():
-    return pymysql.connect(
-        host=Config.DB_HOST,
-        user=Config.DB_USER,
-        password=Config.DB_PASSWORD,
-        database=Config.DB_NAME,
-        cursorclass=pymysql.cursors.DictCursor
-    )
-    
-    
+def get_dynamodb_resource():
+    return boto3.resource('dynamodb', region_name=Config.AWS_REGION)
+
+def get_table():
+    dynamodb = get_dynamodb_resource()
+    return dynamodb.Table(Config.DYNAMODB_TABLE)

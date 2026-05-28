@@ -1,48 +1,74 @@
-from app.db import get_connection
+import uuid
+from datetime import datetime
+from botocore.exceptions import ClientError
+from app.db import get_table
+from app.utils.decoder import decode_dynamodb_item
 
 def get_all():
-    conn = get_connection()
-    with conn.cursor() as cursor:
-        cursor.execute("SELECT * FROM productos")
-        result = cursor.fetchall()
-    conn.close()
-    return result
+    table = get_table()
+    try:
+        response = table.scan()
+        items = response.get('Items', [])
+        return decode_dynamodb_item(items)
+    except ClientError as e:
+        print(f"Error al obtener productos: {e.response['Error']['Message']}")
+        return []
 
 
-def get_by_id(id):
-    conn = get_connection()
-    with conn.cursor() as cursor:
-        cursor.execute("SELECT * FROM productos WHERE id=%s", (id,))
-        result = cursor.fetchone()
-    conn.close()
-    return result
+def get_by_id(producto_id):
+    table = get_table()
+    try:
+        response = table.get_item(Key={'id': producto_id})
+        item = response.get('Item')
+        return decode_dynamodb_item(item)
+    except ClientError as e:
+        print(f"Error al obtener producto {producto_id}: {e.response['Error']['Message']}")
+        return None
 
 
 def create(nombre, precio, cantidad):
-    conn = get_connection()
-    with conn.cursor() as cursor:
-        cursor.execute(
-            "INSERT INTO productos (nombre, precio, cantidad) VALUES (%s, %s, %s)",
-            (nombre, precio, cantidad)
+    table = get_table()
+    producto_id = uuid.uuid4().hex
+    item = {
+        'id': producto_id,
+        'nombre': nombre,
+        'precio': precio,
+        'cantidad': cantidad,
+        'createdAt': datetime.utcnow().isoformat()
+    }
+    try:
+        table.put_item(Item=item)
+        return producto_id
+    except ClientError as e:
+        print(f"Error al crear producto: {e.response['Error']['Message']}")
+        raise e
+
+
+def update(producto_id, nombre, precio, cantidad):
+    table = get_table()
+    try:
+        table.update_item(
+            Key={'id': producto_id},
+            UpdateExpression="set nombre=:n, precio=:p, cantidad=:c, updatedAt=:u",
+            ExpressionAttributeValues={
+                ':n': nombre,
+                ':p': precio,
+                ':c': cantidad,
+                ':u': datetime.utcnow().isoformat()
+            },
+            ReturnValues="UPDATED_NEW"
         )
-    conn.commit()
-    conn.close()
+        return True
+    except ClientError as e:
+        print(f"Error al actualizar producto {producto_id}: {e.response['Error']['Message']}")
+        return False
 
 
-def update(id, nombre, precio, cantidad):
-    conn = get_connection()
-    with conn.cursor() as cursor:
-        cursor.execute(
-            "UPDATE productos SET nombre=%s, precio=%s, cantidad=%s WHERE id=%s",
-            (nombre, precio, cantidad, id)
-        )
-    conn.commit()
-    conn.close()
-
-
-def delete(id):
-    conn = get_connection()
-    with conn.cursor() as cursor:
-        cursor.execute("DELETE FROM productos WHERE id=%s", (id,))
-    conn.commit()
-    conn.close()
+def delete(producto_id):
+    table = get_table()
+    try:
+        table.delete_item(Key={'id': producto_id})
+        return True
+    except ClientError as e:
+        print(f"Error al eliminar producto {producto_id}: {e.response['Error']['Message']}")
+        return False
